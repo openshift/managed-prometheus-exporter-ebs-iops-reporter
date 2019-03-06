@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ebs-iops-reporter
+  namespace: openshift-monitoring
+  labels:
+    k8s-app: ebs-iops-reporter
+    name: ebs-iops-reporter
+spec:
+  endpoints:
+  - honorLabels: true
+    interval: 2m
+    port: http-main
+    scheme: http
+    scrapeTimeout: 2m
+    targetPort: 0
+  jobLabel: ebs-iops-reporter
+  namespaceSelector: {}
+  selector:
+    matchLabels:
+      name: ebs-iops-reporter
