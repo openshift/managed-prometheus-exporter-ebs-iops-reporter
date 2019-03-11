@@ -15,6 +15,18 @@ spec:
       labels:
         name: ebs-iops-reporter
     spec:
+      initContainers:
+      - name: setupcreds
+        image: quay.io/lseelye/yq-kubectl:$INIT_IMAGE_VERSION
+        command: [ "/usr/local/bin/fetch.sh", "-r", "/secrets/aws/config.ini", "-a", "/rawsecrets/aws_access_key_id", "-A", "/rawsecrets/aws_secret_access_key", "-o", "/secrets/aws/credentials.ini" ]
+        volumeMounts:
+        - name: awsrawcreds
+          mountPath: /rawsecrets
+          readOnly: true
+        - name: secrets
+          mountPath: /secrets
+        - name: envfiles
+          mountPath: /config
       containers:
       - name: "main"
         command: ["/usr/bin/python", "/monitor/main.py"]
@@ -49,19 +61,26 @@ spec:
         - name: monitor-volume
           mountPath: /monitor
           readOnly: true
-        - name: credentials-volume
-          mountPath: /secrets/aws
+        - name: envfiles
+          mountPath: /config
+          readOnly: true
+        - name: secrets
+          mountPath: /secrets
           readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       serviceAccountName: sre-ebs-iops-reporter
       volumes:
+      - name: awsrawcreds
+        secret:
+          secretName: ebs-iops-reporter-aws-credentials
+      - name: secrets
+        emptyDir: {}
+      - name: envfiles
+        emptyDir: {}
       - name: monitor-volume
         configMap:
           name: ebs-iops-reporter-code
-      - name: credentials-volume
-        secret:
-          secretName: ebs-iops-reporter-credentials-volume
   triggers:
   - type: ConfigChange
   strategy:

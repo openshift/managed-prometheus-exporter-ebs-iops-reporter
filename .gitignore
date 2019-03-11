@@ -1,6 +1,5 @@
 # Rendered templates
 deploy/025_sourcecode.yaml
-deploy/030_secrets.yaml
 deploy/040_deployment.yaml
 
 # Byte-compiled / optimized / DLL files
