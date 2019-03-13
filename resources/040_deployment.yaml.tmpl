@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
   name: ebs-iops-reporter
@@ -18,7 +18,7 @@ spec:
       initContainers:
       - name: setupcreds
         image: quay.io/lseelye/yq-kubectl:$INIT_IMAGE_VERSION
-        command: [ "/usr/local/bin/fetch.sh", "-r", "/secrets/aws/config.ini", "-a", "/rawsecrets/aws_access_key_id", "-A", "/rawsecrets/aws_secret_access_key", "-o", "/secrets/aws/credentials.ini" ]
+        command: [ "/usr/local/bin/init.py", "-r", "/secrets/aws/config.ini", "-a", "/rawsecrets/aws_access_key_id", "-A", "/rawsecrets/aws_secret_access_key", "-o", "/secrets/aws/credentials.ini", "-c", "/config/env/CLUSTERID" ]
         volumeMounts:
         - name: awsrawcreds
           mountPath: /rawsecrets
@@ -29,7 +29,7 @@ spec:
           mountPath: /config
       containers:
       - name: "main"
-        command: ["/usr/bin/python", "/monitor/main.py"]
+        command: [ "/bin/sh", "/monitor/start.sh" ]
         workingDir: /monitor
         ports:
         - containerPort: 8080
@@ -37,9 +37,9 @@ spec:
         image: 'quay.io/jupierce/openshift-python-monitoring:$IMAGE_VERSION'
         env:
         - name: AWS_SHARED_CREDENTIALS_FILE
-          value: /secrets/aws/credentials
+          value: /secrets/aws/credentials.ini
         - name: AWS_CONFIG_FILE
-          value: /secrets/aws/config
+          value: /secrets/aws/config.ini
         - name: PYTHONPATH
           value: /openshift-python/packages:/support/packages
         imagePullPolicy: IfNotPresent
