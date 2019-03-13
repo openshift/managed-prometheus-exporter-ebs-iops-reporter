@@ -1,23 +1,23 @@
 apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
-  name: ebs-iops-reporter
+  name: $PREFIXED_NAME
   namespace: openshift-monitoring
   labels:
-    name: ebs-iops-reporter
+    name: $PREFIXED_NAME
 spec:
   replicas: 1
   selector:
-    name: ebs-iops-reporter
+    name: $PREFIXED_NAME
   template:
     metadata:
-      name: ebs-iops-reporter
+      name: $PREFIXED_NAME
       labels:
-        name: ebs-iops-reporter
+        name: $PREFIXED_NAME
     spec:
       initContainers:
       - name: setupcreds
-        image: quay.io/lseelye/yq-kubectl:$INIT_IMAGE_VERSION
+        image: $INIT_IMAGE
         command: [ "/usr/local/bin/init.py", "-r", "/secrets/aws/config.ini", "-a", "/rawsecrets/aws_access_key_id", "-A", "/rawsecrets/aws_secret_access_key", "-o", "/secrets/aws/credentials.ini", "-c", "/config/env/CLUSTERID" ]
         volumeMounts:
         - name: awsrawcreds
@@ -34,7 +34,7 @@ spec:
         ports:
         - containerPort: 8080
           protocol: "TCP"
-        image: 'quay.io/jupierce/openshift-python-monitoring:$IMAGE_VERSION'
+        image: $MAIN_IMAGE
         env:
         - name: AWS_SHARED_CREDENTIALS_FILE
           value: /secrets/aws/credentials.ini
@@ -69,18 +69,18 @@ spec:
           readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      serviceAccountName: sre-ebs-iops-reporter
+      serviceAccountName: $SERVICEACCOUNT_NAME
       volumes:
       - name: awsrawcreds
         secret:
-          secretName: ebs-iops-reporter-aws-credentials
+          secretName: $AWS_CREDENTIALS_SECRET_NAME
       - name: secrets
         emptyDir: {}
       - name: envfiles
         emptyDir: {}
       - name: monitor-volume
         configMap:
-          name: ebs-iops-reporter-code
+          name: $SOURCE_CONFIGMAP_NAME
   triggers:
   - type: ConfigChange
   strategy:
