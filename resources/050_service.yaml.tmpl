@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: $PREFIXED_NAME
+  name: $PREFIXED_NAME
+  namespace: openshift-monitoring
+spec:
+  ports:
+  - name: http-main
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: $PREFIXED_NAME
+  sessionAffinity: None
+  type: ClusterIP
