@@ -71,10 +71,6 @@ clean:
 filelist: all
 	@ls -1 deploy/*.y*ml
 
-.PHONE: resourcelist
+.PHONY: resourcelist
 resourcelist:
 	@echo $(RESOURCELIST)
-
-.PHONY: vardump
-vardump:
-	@echo $(SOURCE_CONFIGMAP_NAME)
