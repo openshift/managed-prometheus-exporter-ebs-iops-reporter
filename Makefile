@@ -36,7 +36,7 @@ RESOURCELIST := servicemonitor/$(PREFIXED_NAME) service/$(PREFIXED_NAME) \
 	deploymentconfig/$(PREFIXED_NAME) secret/$(AWS_CREDENTIALS_SECRET_NAME) \
 	configmap/$(SOURCE_CONFIGMAP_NAME) rolebinding/$(PREFIXED_NAME) \
 	serviceaccount/$(SERVICEACCOUNT_NAME) clusterrole/sre-allow-read-cluster-setup \
-	rolebinding/sre-ebs-iops-reporter-read-cluster-setup CredentialsRequest/$(AWS_CREDENTIALS_SECRET_NAME)
+	CredentialsRequest/$(AWS_CREDENTIALS_SECRET_NAME)
 
 
 all: deploy/010_serviceaccount-rolebinding.yaml deploy/020-awscredentials-request.yaml deploy/025_sourcecode.yaml deploy/040_deployment.yaml deploy/050_service.yaml deploy/060_servicemonitor.yaml
