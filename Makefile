@@ -18,8 +18,8 @@ CREDENITALS_SUFFIX ?= -aws-credentials
 
 MAIN_IMAGE_URI ?= quay.io/jupierce/openshift-python-monitoring
 IMAGE_VERSION ?= stable
-INIT_IMAGE_URI ?= quay.io/redhat/managed-prometheus-exporter-initcontainer
-INIT_IMAGE_VERSION ?= v1903.0.1
+INIT_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-initcontainer
+INIT_IMAGE_VERSION ?= v0.1.9-2019-03-28-4e558131
 
 # Generate variables
 
