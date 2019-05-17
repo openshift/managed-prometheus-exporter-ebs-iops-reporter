@@ -1,5 +1,20 @@
 SHELL := /bin/bash
 include functions.mk
+include project.mk
+
+#Validate variables in project.mk exist
+ifndef YAML_DIRECTORY
+$(error YAML_DIRECTORY is not set; check project.mk file)
+endif
+ifndef SELECTOR_SYNC_SET_TEMPLATE
+$(error SELECTOR_SYNC_SET_TEMPLATE is not set; check project.mk file)
+endif
+ifndef SELECTOR_SYNC_SET_DESTINATION
+$(error SELECTOR_SYNC_SET_DESTINATION is not set; check project.mk file)
+endif
+ifndef GIT_HASH
+$(error SELECTOR_SYNC_SET_DESTINATION is not set; check project.mk file)
+endif
 
 # Name of the exporter
 EXPORTER_NAME := ebs-iops-reporter
@@ -39,7 +54,7 @@ RESOURCELIST := servicemonitor/$(PREFIXED_NAME) service/$(PREFIXED_NAME) \
 	CredentialsRequest/$(AWS_CREDENTIALS_SECRET_NAME)
 
 
-all: deploy/010_serviceaccount-rolebinding.yaml deploy/020-awscredentials-request.yaml deploy/025_sourcecode.yaml deploy/040_deployment.yaml deploy/050_service.yaml deploy/060_servicemonitor.yaml
+all: deploy/010_serviceaccount-rolebinding.yaml deploy/020-awscredentials-request.yaml deploy/025_sourcecode.yaml deploy/040_deployment.yaml deploy/050_service.yaml deploy/060_servicemonitor.yaml generate-syncset
 
 deploy/020-awscredentials-request.yaml: resources/020-awscredentials-request.yaml.tmpl
 	@$(call generate_file,020-awscredentials-request)
@@ -62,10 +77,14 @@ deploy/050_service.yaml: resources/050_service.yaml.tmpl
 deploy/060_servicemonitor.yaml: resources/060_servicemonitor.yaml.tmpl
 	@$(call generate_file,060_servicemonitor)
 
+.PHONY: generate-syncset
+generate-syncset: 
+	scripts/generate_syncset.py -t ${SELECTOR_SYNC_SET_TEMPLATE} -y ${YAML_DIRECTORY} -d ${SELECTOR_SYNC_SET_DESTINATION} -c ${GIT_HASH}
 
 .PHONY: clean
 clean:
 	rm -f deploy/*.yaml
+	rm -rf ${SELECTOR_SYNC_SET_DESTINATION}
 
 .PHONY: filelist
 filelist: all
