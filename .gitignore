@@ -105,3 +105,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# selector sync set yaml
+00-osd-managed-prometheus-exporter-ebs-iops-reporter.selectorsyncset.yaml
