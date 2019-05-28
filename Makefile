@@ -93,3 +93,8 @@ filelist: all
 .PHONY: resourcelist
 resourcelist:
 	@echo $(RESOURCELIST)
+
+.PHONY: git-commit-sss-template
+git-commit-sss-template:
+	git add ${SELECTOR_SYNC_SET_DESTINATION}
+	git commit -m "Updated selectorsynceset template added"

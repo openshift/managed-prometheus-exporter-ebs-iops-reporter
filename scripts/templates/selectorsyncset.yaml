@@ -1,10 +1,19 @@
-apiVersion: hive.openshift.io/v1alpha1
-kind: SelectorSyncSet
+apiVersion: v1
+kind: Template
+parameters:
+- name: IMAGE_TAG
+  value: latest
+  required: true
 metadata:
-  generation: 1
-  name: managed-prometheus-exporter-ebs-iops-reporter
-spec:
-  clusterDeploymentSelector:
-    matchLabels:
-      api.openshift.com/managed: "true"
-  resourceApplyMode: sync
+  name: selectorsyncset-template
+objects:
+- apiVersion: hive.openshift.io/v1alpha1
+  kind: SelectorSyncSet
+  metadata:
+    generation: 1
+    name: managed-prometheus-exporter-ebs-iops-reporter
+  spec:
+    clusterDeploymentSelector:
+      matchLabels:
+        api.openshift.com/managed: "true"
+    resourceApplyMode: sync
