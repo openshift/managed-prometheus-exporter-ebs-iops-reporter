@@ -6,11 +6,22 @@ objects:
 - apiVersion: hive.openshift.io/v1alpha1
   kind: SelectorSyncSet
   metadata:
+    name: osd-managed-prometheus-exporter-dns
+  spec:
+    clusterDeploymentSelector:
+      matchLabels:
+        api.openshift.com/managed: 'true'
+    resourceApplyMode: sync
+    resources: []
+- apiVersion: hive.openshift.io/v1alpha1
+  kind: SelectorSyncSet
+  metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: 43ffb15
+      managed.openshift.io/gitHash: ${IMAGE_TAG}
+      managed.openshift.io/gitRepoName: managed-prometheus-exporter-ebs-iops-reporter
       managed.openshift.io/osd: 'true'
-    name: osd-managed-prometheus-exporter-ebs-iops-reporter
+    name: managed-prometheus-exporter-ebs-iops-reporter
   spec:
     clusterDeploymentSelector:
       matchLabels:

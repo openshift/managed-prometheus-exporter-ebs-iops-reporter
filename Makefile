@@ -12,8 +12,8 @@ endif
 ifndef SELECTOR_SYNC_SET_DESTINATION
 $(error SELECTOR_SYNC_SET_DESTINATION is not set; check project.mk file)
 endif
-ifndef GIT_HASH
-$(error GIT_HASH is not set; check project.mk file)
+ifndef REPO_NAME
+$(error REPO_NAME is not set; check project.mk file)
 endif
 
 # Name of the exporter
@@ -79,7 +79,7 @@ deploy/060_servicemonitor.yaml: resources/060_servicemonitor.yaml.tmpl
 
 .PHONY: generate-syncset
 generate-syncset: 
-	scripts/generate_syncset.py -t ${SELECTOR_SYNC_SET_TEMPLATE} -y ${YAML_DIRECTORY} -d ${SELECTOR_SYNC_SET_DESTINATION} -c ${GIT_HASH}
+	scripts/generate_syncset.py -t ${SELECTOR_SYNC_SET_TEMPLATE} -y ${YAML_DIRECTORY} -d ${SELECTOR_SYNC_SET_DESTINATION} -r ${REPO_NAME}
 
 .PHONY: clean
 clean:
