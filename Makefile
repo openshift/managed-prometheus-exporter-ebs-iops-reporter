@@ -72,7 +72,7 @@ deploy/025_sourcecode.yaml: $(SOURCEFILES)
 	@for sfile in $(SOURCEFILES); do \
 		files="--from-file=$$sfile $$files" ; \
 	done ; \
-	kubectl -n openshift-monitoring create configmap $(SOURCE_CONFIGMAP_NAME) --dry-run=true -o yaml $$files 1> deploy/025_sourcecode.yaml
+	oc --config=.kubeconfig -n openshift-monitoring create configmap $(SOURCE_CONFIGMAP_NAME) --dry-run=true -o yaml $$files 1> deploy/025_sourcecode.yaml
 
 deploy/040_deployment.yaml: resources/040_deployment.yaml.tmpl
 	@$(call generate_file,040_deployment)
