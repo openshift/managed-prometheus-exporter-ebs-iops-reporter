@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: 43ffb15
+      managed.openshift.io/gitHash: e1d3218
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -253,8 +253,14 @@ objects:
                 name: secrets
               - mountPath: /config
                 name: envfiles
+            nodeSelector:
+              node-role.kubernetes.io/infra: ''
             restartPolicy: Always
             serviceAccountName: sre-ebs-iops-reporter
+            tolerations:
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/infra
+              operator: Exists
             volumes:
             - name: awsrawcreds
               secret:

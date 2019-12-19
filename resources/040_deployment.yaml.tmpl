@@ -27,6 +27,12 @@ spec:
           mountPath: /secrets
         - name: envfiles
           mountPath: /config
+      nodeSelector:
+        node-role.kubernetes.io/infra: ''
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/infra
+          operator: Exists
       containers:
       - name: "main"
         command: [ "/bin/sh", "/monitor/start.sh" ]
