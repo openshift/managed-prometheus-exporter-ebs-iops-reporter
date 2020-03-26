@@ -8,14 +8,15 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: e5f4d8d
+      managed.openshift.io/gitHash: 2ccb246
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
     clusterDeploymentSelector:
       matchLabels:
         api.openshift.com/managed: 'true'
-    resourceApplyMode: sync
+        hive.openshift.io/cluster-platform: aws
+    resourceApplyMode: Sync
     resources:
     - apiVersion: v1
       kind: ServiceAccount
