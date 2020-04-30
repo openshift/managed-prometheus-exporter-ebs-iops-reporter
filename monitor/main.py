@@ -134,9 +134,16 @@ if __name__ == "__main__":
     if "AWS_PROFILE" in os.environ:
         args['aws_profile'] = os.environ['AWS_PROFILE']
 
-    logging.info("Starting ebs-iops-reporter with aws_profile=%s, aws_region=%s",args['aws_profile'],args['aws_region'])
+    # If AWS_CONFIG_FILE is set then use the region in that file.
+    # Else use the passed value or default.
+    if "AWS_CONFIG_FILE" in os.environ:
+        session = boto3.session.Session(profile_name=args['aws_profile'])
+        args['aws_region'] = session.region_name
+    else:
+        session = boto3.session.Session(profile_name=args['aws_profile'],region_name=args['aws_region'])
+        
+    logging.info("Started ebs-iops-reporter with aws_profile=%s, aws_region=%s",args['aws_profile'],args['aws_region'])
 
-    session = boto3.session.Session(profile_name=args['aws_profile'],region_name=args['aws_region'])
     cw = session.client('cloudwatch')
 
     start_http_server(8080)
