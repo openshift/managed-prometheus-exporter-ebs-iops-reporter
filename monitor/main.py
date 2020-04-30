@@ -123,7 +123,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Options for EBS IOPS Exporter')
     parser.add_argument('-p', '--aws-profile', help='Name of AWS credentials profile to use', required=False, default="default")
-    parser.add_argument('-r', '--aws-region', help='AWS Regiom to use', required=False, default="us-east-1")
+    parser.add_argument('-r', '--aws-region', help='AWS Region to use', required=False, default="us-east-1")
     args = vars(parser.parse_args())
    
     # Preference order for the AWS profile:
@@ -133,6 +133,9 @@ if __name__ == "__main__":
 
     if "AWS_PROFILE" in os.environ:
         args['aws_profile'] = os.environ['AWS_PROFILE']
+
+    if "AWS_CONFIG_FILE" in os.environ:
+        args['aws_region'] = os.environ['AWS_CONFIG_FILE']
 
     logging.info("Starting ebs-iops-reporter with aws_profile=%s, aws_region=%s",args['aws_profile'],args['aws_region'])
 
