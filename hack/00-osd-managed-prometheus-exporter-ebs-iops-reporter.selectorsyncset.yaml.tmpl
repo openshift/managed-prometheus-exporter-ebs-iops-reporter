@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: 2ccb246
+      managed.openshift.io/gitHash: 291f7ed
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -153,13 +153,17 @@ objects:
           \ the AWS profile:\n    # 1. Environment variables (AWS_PROFILE)\n    #\
           \ 2. Argument to program (--aws-profile)\n    # 3. \"default\", if neither\
           \ are specified\n\n    if \"AWS_PROFILE\" in os.environ:\n        args['aws_profile']\
-          \ = os.environ['AWS_PROFILE']\n\n    logging.info(\"Starting ebs-iops-reporter\
-          \ with aws_profile=%s, aws_region=%s\",args['aws_profile'],args['aws_region'])\n\
-          \n    session = boto3.session.Session(profile_name=args['aws_profile'],region_name=args['aws_region'])\n\
-          \    cw = session.client('cloudwatch')\n\n    start_http_server(8080)\n\
-          \    while True:\n        collect(cw)\n        # Sleep for the interval\n\
-          \        logging.info(\"Going to sleep for %d seconds\",CLOUDWATCH_PERIOD*60)\n\
-          \        time.sleep(CLOUDWATCH_PERIOD * 60)\n"
+          \ = os.environ['AWS_PROFILE']\n\n    # If AWS_CONFIG_FILE is set then use\
+          \ the region in that file.\n    # Else use the passed value or default.\n\
+          \    if \"AWS_CONFIG_FILE\" in os.environ:\n        session = boto3.session.Session(profile_name=args['aws_profile'])\n\
+          \        args['aws_region'] = session.region_name\n    else:\n        session\
+          \ = boto3.session.Session(profile_name=args['aws_profile'],region_name=args['aws_region'])\n\
+          \        \n    logging.info(\"Started ebs-iops-reporter with aws_profile=%s,\
+          \ aws_region=%s\",args['aws_profile'],args['aws_region'])\n\n    cw = session.client('cloudwatch')\n\
+          \n    start_http_server(8080)\n    while True:\n        collect(cw)\n  \
+          \      # Sleep for the interval\n        logging.info(\"Going to sleep for\
+          \ %d seconds\",CLOUDWATCH_PERIOD*60)\n        time.sleep(CLOUDWATCH_PERIOD\
+          \ * 60)\n"
         start.sh: "#!/bin/sh\n\nset -o allexport\n\nif [[ -d /config && -d /config/env\
           \ ]]; then\n  source /config/env/*\nfi\n\nexec /usr/bin/python /monitor/main.py\
           \ \"$@\""
