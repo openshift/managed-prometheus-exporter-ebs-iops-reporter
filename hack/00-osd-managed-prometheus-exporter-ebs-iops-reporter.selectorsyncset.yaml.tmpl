@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: 291f7ed
+      managed.openshift.io/gitHash: 64a2a13
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -82,14 +82,15 @@ objects:
     - apiVersion: v1
       data:
         main.py: "#!/usr/bin/env python\n\nfrom sets import Set\n\nimport argparse\n\
-          import boto3\nimport datetime\nimport logging\nimport os\nimport re\nimport\
-          \ time\n\nfrom prometheus_client import start_http_server, Gauge\n\nEBS_IOPS\
-          \ = Gauge(\"ebs_iops_credits\",\"Percent of burstable IOPS credit available\"\
-          , labelnames=['vol_id'])\n\n# A list (implemented as a Set) of all active\
-          \ volumes. \nACTIVE_VOLUMES = Set([])\n\n# Period in minutes from cloudwatch\
-          \ to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
-          CLOUDWATCH_PERIOD = 5\n\ndef chunks(l,n):\n    \"\"\"\n    Chunks up an\
-          \ array +l+ into chunks of +n+ size\n    Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks\n\
+          import boto3\nimport botocore\nimport datetime\nimport logging\nimport os\n\
+          import re\nimport time\n\nfrom prometheus_client import start_http_server,\
+          \ Gauge, Counter\n\nEBS_IOPS = Gauge(\"ebs_iops_credits\",\"Percent of burstable\
+          \ IOPS credit available\", labelnames=['vol_id'])\n\n# A list (implemented\
+          \ as a Set) of all active volumes. \nACTIVE_VOLUMES = Set([])\n\n# Period\
+          \ in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
+          CLOUDWATCH_PERIOD = 5\n\nBOTO_ERRS = Counter('boto_exceptions', 'The total\
+          \ number of boto exceptions')\n\ndef chunks(l,n):\n    \"\"\"\n    Chunks\
+          \ up an array +l+ into chunks of +n+ size\n    Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks\n\
           \    \"\"\"\n    for i in xrange(0,len(l),n):\n        yield l[i:i+n]\n\n\
           def round_time(period):\n    \"\"\"\n    Round the current date (in utc)\
           \ to the nearest +period+ minutes. \n    For example, if the current time\
@@ -160,9 +161,14 @@ objects:
           \ = boto3.session.Session(profile_name=args['aws_profile'],region_name=args['aws_region'])\n\
           \        \n    logging.info(\"Started ebs-iops-reporter with aws_profile=%s,\
           \ aws_region=%s\",args['aws_profile'],args['aws_region'])\n\n    cw = session.client('cloudwatch')\n\
-          \n    start_http_server(8080)\n    while True:\n        collect(cw)\n  \
-          \      # Sleep for the interval\n        logging.info(\"Going to sleep for\
-          \ %d seconds\",CLOUDWATCH_PERIOD*60)\n        time.sleep(CLOUDWATCH_PERIOD\
+          \n    start_http_server(8080)\n    while True:\n        try:\n         \
+          \   collect(cw)\n        except botocore.exceptions.ClientError as err:\n\
+          \            BOTO_ERRS.inc()\n            logging.error(\"Caught boto error\"\
+          )\n            logging.error('Error Message: {}'.format(err.response['Error']['Message']))\n\
+          \            logging.error('Request ID: {}'.format(err.response['ResponseMetadata']['RequestId']))\n\
+          \            logging.error('Http code: {}'.format(err.response['ResponseMetadata']['HTTPStatusCode']))\n\
+          \        finally:\n            # Sleep for the interval\n            logging.info(\"\
+          Going to sleep for %d seconds\",CLOUDWATCH_PERIOD*60)\n            time.sleep(CLOUDWATCH_PERIOD\
           \ * 60)\n"
         start.sh: "#!/bin/sh\n\nset -o allexport\n\nif [[ -d /config && -d /config/env\
           \ ]]; then\n  source /config/env/*\nfi\n\nexec /usr/bin/python /monitor/main.py\
