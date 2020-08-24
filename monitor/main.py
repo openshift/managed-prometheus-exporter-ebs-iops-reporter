@@ -4,13 +4,14 @@ from sets import Set
 
 import argparse
 import boto3
+import botocore
 import datetime
 import logging
 import os
 import re
 import time
 
-from prometheus_client import start_http_server, Gauge
+from prometheus_client import start_http_server, Gauge, Counter
 
 EBS_IOPS = Gauge("ebs_iops_credits","Percent of burstable IOPS credit available", labelnames=['vol_id'])
 
@@ -20,6 +21,8 @@ ACTIVE_VOLUMES = Set([])
 # Period in minutes from cloudwatch to request
 # See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 CLOUDWATCH_PERIOD = 5
+
+BOTO_ERRS = Counter('boto_exceptions', 'The total number of boto exceptions')
 
 def chunks(l,n):
     """
@@ -148,7 +151,15 @@ if __name__ == "__main__":
 
     start_http_server(8080)
     while True:
-        collect(cw)
-        # Sleep for the interval
-        logging.info("Going to sleep for %d seconds",CLOUDWATCH_PERIOD*60)
-        time.sleep(CLOUDWATCH_PERIOD * 60)
+        try:
+            collect(cw)
+        except botocore.exceptions.ClientError as err:
+            BOTO_ERRS.inc()
+            logging.error("Caught boto error")
+            logging.error('Error Message: {}'.format(err.response['Error']['Message']))
+            logging.error('Request ID: {}'.format(err.response['ResponseMetadata']['RequestId']))
+            logging.error('Http code: {}'.format(err.response['ResponseMetadata']['HTTPStatusCode']))
+        finally:
+            # Sleep for the interval
+            logging.info("Going to sleep for %d seconds",CLOUDWATCH_PERIOD*60)
+            time.sleep(CLOUDWATCH_PERIOD * 60)
