@@ -31,8 +31,8 @@ NAME_PREFIX ?= sre-
 SOURCE_CONFIGMAP_SUFFIX ?= -code
 CREDENITALS_SUFFIX ?= -aws-credentials
 
-MAIN_IMAGE_URI ?= quay.io/jupierce/openshift-python-monitoring
-IMAGE_VERSION ?= stable
+MAIN_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-base
+IMAGE_VERSION ?= 0.1.3-5a0899dd
 INIT_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-initcontainer
 INIT_IMAGE_VERSION ?= v0.1.9-2019-03-28-4e558131
 
