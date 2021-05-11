@@ -97,7 +97,8 @@ def collect(aws):
 
     # get data for all the volume IDs
     volumeDataPager = cw.get_paginator('get_metric_data')
-    time_start = round_time(CLOUDWATCH_PERIOD)
+    timetoround = get_utcnow()
+    time_start = round_time(timetoround, CLOUDWATCH_PERIOD)
     logging.debug("Requesting from %s to %s with period of %d minutes",
                   time_start -
                   (datetime.timedelta(minutes=CLOUDWATCH_PERIOD) * 2),
