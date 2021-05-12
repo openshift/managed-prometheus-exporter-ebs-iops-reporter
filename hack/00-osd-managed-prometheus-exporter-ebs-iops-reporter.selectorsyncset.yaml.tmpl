@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: 3142af1
+      managed.openshift.io/gitHash: 6103ddb
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -119,9 +119,10 @@ objects:
           \                'Period': CLOUDWATCH_PERIOD * 60,\n                'Stat':\
           \ 'Average',\n                'Unit': 'Percent',\n            }\n      \
           \  }\n        )\n\n    # get data for all the volume IDs\n    volumeDataPager\
-          \ = cw.get_paginator('get_metric_data')\n    time_start = round_time(CLOUDWATCH_PERIOD)\n\
-          \    logging.debug(\"Requesting from %s to %s with period of %d minutes\"\
-          ,\n                  time_start -\n                  (datetime.timedelta(minutes=CLOUDWATCH_PERIOD)\
+          \ = cw.get_paginator('get_metric_data')\n    timetoround = get_utcnow()\n\
+          \    time_start = round_time(timetoround, CLOUDWATCH_PERIOD)\n    logging.debug(\"\
+          Requesting from %s to %s with period of %d minutes\",\n                \
+          \  time_start -\n                  (datetime.timedelta(minutes=CLOUDWATCH_PERIOD)\
           \ * 2),\n                  time_start-datetime.timedelta(minutes=CLOUDWATCH_PERIOD),\n\
           \                  CLOUDWATCH_PERIOD*60)\n\n    # We have to go in chunks\
           \ of 100 volumes (now, dimensionCriteria) otherwise\n    # Error: The collection\
