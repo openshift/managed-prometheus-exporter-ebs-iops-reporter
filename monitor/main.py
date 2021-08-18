@@ -31,7 +31,7 @@ def chunks(l, n):
     Chunks up an array +l+ into chunks of +n+ size
     Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
     """
-    for i in xrange(0, len(l), n):
+    for i in range(0,len(l),n):
         yield l[i:i+n]
 
 
@@ -43,7 +43,7 @@ def get_utcnow():
 
 def round_time(timetoround, period):
     """
-    Round the current date (in utc) to the nearest +period+ minutes. 
+    Round the current date (in utc) to the nearest +period+ minutes.
     For example, if the current time is 16:23 and +period+ is 10 (minutes), the
     return time will be 16:20.
     Based on:

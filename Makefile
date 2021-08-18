@@ -6,14 +6,11 @@ include project.mk
 ifndef YAML_DIRECTORY
 $(error YAML_DIRECTORY is not set; check project.mk file)
 endif
-ifndef SELECTOR_SYNC_SET_TEMPLATE
-$(error SELECTOR_SYNC_SET_TEMPLATE is not set; check project.mk file)
-endif
 ifndef SELECTOR_SYNC_SET_DESTINATION
 $(error SELECTOR_SYNC_SET_DESTINATION is not set; check project.mk file)
 endif
-ifndef GIT_HASH
-$(error GIT_HASH is not set; check project.mk file)
+ifndef REPO_NAME
+$(error REPO_NAME is not set; check project.mk file)
 endif
 
 # Name of the exporter
@@ -32,9 +29,10 @@ SOURCE_CONFIGMAP_SUFFIX ?= -code
 CREDENITALS_SUFFIX ?= -aws-credentials
 
 MAIN_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-base
-IMAGE_VERSION ?= 0.1.3-5a0899dd
+IMAGE_VERSION ?= latest
+
 INIT_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-initcontainer
-INIT_IMAGE_VERSION ?= v0.1.9-2019-03-28-4e558131
+INIT_IMAGE_VERSION ?= latest
 
 # Generate variables
 
@@ -66,7 +64,7 @@ deploy/025_sourcecode.yaml: $(SOURCEFILES)
 	@for sfile in $(SOURCEFILES); do \
 		files="--from-file=$$sfile $$files" ; \
 	done ; \
-	kubectl -n openshift-monitoring create configmap $(SOURCE_CONFIGMAP_NAME) --dry-run=true -o yaml $$files 1> deploy/025_sourcecode.yaml
+	oc -n openshift-monitoring create configmap $(SOURCE_CONFIGMAP_NAME) --dry-run=client -o yaml $$files 1> $@
 
 deploy/040_deployment.yaml: resources/040_deployment.yaml.tmpl
 	@$(call generate_file,040_deployment)
@@ -78,8 +76,10 @@ deploy/060_servicemonitor.yaml: resources/060_servicemonitor.yaml.tmpl
 	@$(call generate_file,060_servicemonitor)
 
 .PHONY: generate-syncset
-generate-syncset: 
-	scripts/generate_syncset.py -t ${SELECTOR_SYNC_SET_TEMPLATE} -y ${YAML_DIRECTORY} -d ${SELECTOR_SYNC_SET_DESTINATION} -c ${GIT_HASH}
+generate-syncset:
+	docker pull quay.io/app-sre/python:2 && docker tag quay.io/app-sre/python:2 python:2 || true; \
+	docker run --rm -v `pwd -P`:`pwd -P` python:2 /bin/sh -c "cd `pwd -P`; pip install pyyaml; scripts/generate_syncset.py -t ${SELECTOR_SYNC_SET_TEMPLATE_DIR} -y ${YAML_DIRECTORY} -d ${SELECTOR_SYNC_SET_DESTINATION} -r ${REPO_NAME}"
+
 
 .PHONY: clean
 clean:
