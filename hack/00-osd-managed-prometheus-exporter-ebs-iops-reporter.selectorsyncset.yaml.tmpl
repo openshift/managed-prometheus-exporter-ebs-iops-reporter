@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: 6103ddb
+      managed.openshift.io/gitHash: '2891302'
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -105,10 +105,11 @@ objects:
           \ data from the AWS API\n    \"\"\"\n\n    # All the volumes CloudWatch\
           \ tells us it knows about (whether or not it has data)\n    volumes = Set([])\n\
           \n    # List of volumes that we've actually had data back for the API\n\
-          \    seen_volumes = Set([])\n\n    # get all the volume IDs. Note, not all\
-          \ of these will necessarily have metrics\n    volumePager = cw.get_paginator('list_metrics')\n\
-          \    for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS'):\n\
-          \        for v in p['Metrics']:\n            volumes.add(v['Dimensions'][0]['Value'])\n\
+          \    seen_volumes = Set([])\n\n    # get the volume IDs and filter the results\
+          \ to show only metrics that have had data points published in the past three\
+          \ hours (PT3H)\n    volumePager = cw.get_paginator('list_metrics')\n   \
+          \ for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS',\
+          \ RecentlyActive='PT3H'):\n        for v in p['Metrics']:\n            volumes.add(v['Dimensions'][0]['Value'])\n\
           \n    dimensionCriteria = []\n    for volume in list(volumes):\n       \
           \ dimensionCriteria.append({\n            'Id': re.sub(r'^vol-', \"vol_\"\
           , volume, 0),\n            'MetricStat': {\n                'Metric': {\n\
@@ -151,7 +152,7 @@ objects:
           \ Exporter')\n    parser.add_argument('-p', '--aws-profile',\n         \
           \               help='Name of AWS credentials profile to use', required=False,\
           \ default=\"default\")\n    parser.add_argument('-r', '--aws-region', help='AWS\
-          \ Regiom to use',\n                        required=False, default=\"us-east-1\"\
+          \ Region to use',\n                        required=False, default=\"us-east-1\"\
           )\n    args = vars(parser.parse_args())\n\n    # Preference order for the\
           \ AWS profile:\n    # 1. Environment variables (AWS_PROFILE)\n    # 2. Argument\
           \ to program (--aws-profile)\n    # 3. \"default\", if neither are specified\n\
