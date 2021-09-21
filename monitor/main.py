@@ -68,9 +68,9 @@ def collect(aws):
     # List of volumes that we've actually had data back for the API
     seen_volumes = Set([])
 
-    # get the volume IDs and filter the results to show only metrics that have had data points published in the past three hours (PT3H)
+    # get the volume IDs and filter the results to show only metrics that have had data points published in the past three hours
     volumePager = cw.get_paginator('list_metrics')
-    for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS', RecentlyActive='PT3H'):
+    for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS'):
         for v in p['Metrics']:
             volumes.add(v['Dimensions'][0]['Value'])
 
@@ -88,7 +88,7 @@ def collect(aws):
                         }
                     ]
                 },
-                'Period': CLOUDWATCH_PERIOD * 60,
+                'Period': CLOUDWATCH_PERIOD * 36,
                 'Stat': 'Average',
                 'Unit': 'Percent',
             }
