@@ -28,10 +28,10 @@ NAME_PREFIX ?= sre-
 SOURCE_CONFIGMAP_SUFFIX ?= -code
 CREDENITALS_SUFFIX ?= -aws-credentials
 
-MAIN_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-base
+MAIN_IMAGE_URI ?= quay.io/app-sre/managed-prometheus-exporter-base
 IMAGE_VERSION ?= latest
 
-INIT_IMAGE_URI ?= quay.io/openshift-sre/managed-prometheus-exporter-initcontainer
+INIT_IMAGE_URI ?= quay.io/app-sre/managed-prometheus-exporter-initcontainer
 INIT_IMAGE_VERSION ?= latest
 
 # Generate variables
@@ -77,7 +77,7 @@ deploy/060_servicemonitor.yaml: resources/060_servicemonitor.yaml.tmpl
 
 .PHONY: generate-syncset
 generate-syncset:
-	docker pull quay.io/app-sre/python:2 && docker tag quay.io/app-sre/python:2 python:2 || true; \
+	docker pull quay.io/app-sre/python:2 2>/dev/null && docker tag quay.io/app-sre/python:2 python:2 || true; \
 	docker run --rm -v `pwd -P`:`pwd -P` python:2 /bin/sh -c "cd `pwd -P`; pip install pyyaml; scripts/generate_syncset.py -t ${SELECTOR_SYNC_SET_TEMPLATE_DIR} -y ${YAML_DIRECTORY} -d ${SELECTOR_SYNC_SET_DESTINATION} -r ${REPO_NAME}"
 
 
