@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from sets import Set
 
 import argparse
 import boto3
@@ -17,7 +16,7 @@ EBS_IOPS = Gauge("ebs_iops_credits",
                  "Percent of burstable IOPS credit available", labelnames=['vol_id'])
 
 # A list (implemented as a Set) of all active volumes.
-ACTIVE_VOLUMES = Set([])
+ACTIVE_VOLUMES = set([])
 
 # Period in minutes from cloudwatch to request
 # See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
@@ -31,7 +30,7 @@ def chunks(l, n):
     Chunks up an array +l+ into chunks of +n+ size
     Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
     """
-    for i in xrange(0, len(l), n):
+    for i in range(0, len(l), n):
         yield l[i:i+n]
 
 
@@ -63,10 +62,10 @@ def collect(aws):
     """
 
     # All the volumes CloudWatch tells us it knows about (whether or not it has data)
-    volumes = Set([])
+    volumes = set([])
 
     # List of volumes that we've actually had data back for the API
-    seen_volumes = Set([])
+    seen_volumes = set([])
 
     # get the volume IDs and filter the results to show only metrics that have had data points published in the past three hours
     volumePager = cw.get_paginator('list_metrics')

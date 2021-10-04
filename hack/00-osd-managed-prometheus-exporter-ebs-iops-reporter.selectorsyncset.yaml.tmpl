@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: c5d89fb
+      managed.openshift.io/gitHash: fdefe5d
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -81,17 +81,17 @@ objects:
           namespace: openshift-monitoring
     - apiVersion: v1
       data:
-        main.py: "#!/usr/bin/env python\n\nfrom sets import Set\n\nimport argparse\n\
-          import boto3\nimport botocore\nimport datetime\nimport logging\nimport os\n\
-          import re\nimport time\n\nfrom prometheus_client import start_http_server,\
-          \ Gauge, Counter\n\nEBS_IOPS = Gauge(\"ebs_iops_credits\",\n           \
-          \      \"Percent of burstable IOPS credit available\", labelnames=['vol_id'])\n\
-          \n# A list (implemented as a Set) of all active volumes.\nACTIVE_VOLUMES\
-          \ = Set([])\n\n# Period in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
+        main.py: "#!/usr/bin/env python\n\n\nimport argparse\nimport boto3\nimport\
+          \ botocore\nimport datetime\nimport logging\nimport os\nimport re\nimport\
+          \ time\n\nfrom prometheus_client import start_http_server, Gauge, Counter\n\
+          \nEBS_IOPS = Gauge(\"ebs_iops_credits\",\n                 \"Percent of\
+          \ burstable IOPS credit available\", labelnames=['vol_id'])\n\n# A list\
+          \ (implemented as a Set) of all active volumes.\nACTIVE_VOLUMES = set([])\n\
+          \n# Period in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
           CLOUDWATCH_PERIOD = 5\n\nBOTO_ERRS = Counter('boto_exceptions', 'The total\
           \ number of boto exceptions')\n\n\ndef chunks(l, n):\n    \"\"\"\n    Chunks\
           \ up an array +l+ into chunks of +n+ size\n    Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks\n\
-          \    \"\"\"\n    for i in xrange(0, len(l), n):\n        yield l[i:i+n]\n\
+          \    \"\"\"\n    for i in range(0, len(l), n):\n        yield l[i:i+n]\n\
           \n\ndef get_utcnow():\n    # Split out the request for UTC from the round_time\
           \ function, built-ins cannot be mocked.\n    timetoround = datetime.datetime.utcnow()\n\
           \    return timetoround\n\n\ndef round_time(timetoround, period):\n    \"\
@@ -103,9 +103,9 @@ objects:
           \              seconds=t.second,\n                            microseconds=t.microsecond)\n\
           \    return t\n\n\ndef collect(aws):\n    \"\"\"\n    Collect the current\
           \ data from the AWS API\n    \"\"\"\n\n    # All the volumes CloudWatch\
-          \ tells us it knows about (whether or not it has data)\n    volumes = Set([])\n\
+          \ tells us it knows about (whether or not it has data)\n    volumes = set([])\n\
           \n    # List of volumes that we've actually had data back for the API\n\
-          \    seen_volumes = Set([])\n\n    # get the volume IDs and filter the results\
+          \    seen_volumes = set([])\n\n    # get the volume IDs and filter the results\
           \ to show only metrics that have had data points published in the past three\
           \ hours\n    volumePager = cw.get_paginator('list_metrics')\n    for p in\
           \ volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS'):\n\
@@ -221,7 +221,7 @@ objects:
                 value: /secrets/aws/config.ini
               - name: PYTHONPATH
                 value: /openshift-python/packages:/support/packages
-              image: quay.io/openshift-sre/managed-prometheus-exporter-base:0.1.3-5a0899dd
+              image: quay.io/app-sre/managed-prometheus-exporter-base:latest
               imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 2
@@ -266,7 +266,7 @@ objects:
               - /secrets/aws/credentials.ini
               - -c
               - /config/env/CLUSTERID
-              image: quay.io/openshift-sre/managed-prometheus-exporter-initcontainer:v0.1.9-2019-03-28-4e558131
+              image: quay.io/app-sre/managed-prometheus-exporter-initcontainer:latest
               name: setupcreds
               volumeMounts:
               - mountPath: /rawsecrets
