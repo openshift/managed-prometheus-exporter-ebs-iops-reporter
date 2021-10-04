@@ -68,7 +68,7 @@ def collect(aws):
     # List of volumes that we've actually had data back for the API
     seen_volumes = Set([])
 
-    # get all the volume IDs. Note, not all of these will necessarily have metrics
+    # get the volume IDs and filter the results to show only metrics that have had data points published in the past three hours
     volumePager = cw.get_paginator('list_metrics')
     for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS'):
         for v in p['Metrics']:
@@ -88,7 +88,7 @@ def collect(aws):
                         }
                     ]
                 },
-                'Period': CLOUDWATCH_PERIOD * 60,
+                'Period': CLOUDWATCH_PERIOD * 36,
                 'Stat': 'Average',
                 'Unit': 'Percent',
             }
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         description='Options for EBS IOPS Exporter')
     parser.add_argument('-p', '--aws-profile',
                         help='Name of AWS credentials profile to use', required=False, default="default")
-    parser.add_argument('-r', '--aws-region', help='AWS Regiom to use',
+    parser.add_argument('-r', '--aws-region', help='AWS Region to use',
                         required=False, default="us-east-1")
     args = vars(parser.parse_args())
 
