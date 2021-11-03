@@ -69,7 +69,7 @@ def collect(aws):
 
     # get the volume IDs and filter the results to show only metrics that have had data points published in the past three hours
     volumePager = cw.get_paginator('list_metrics')
-    for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS'):
+    for p in volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS', RecentlyActive='PT3H'):
         for v in p['Metrics']:
             volumes.add(v['Dimensions'][0]['Value'])
 

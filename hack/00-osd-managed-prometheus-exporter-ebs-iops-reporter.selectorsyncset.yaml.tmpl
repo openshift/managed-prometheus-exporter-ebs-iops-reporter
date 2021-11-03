@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: fdefe5d
+      managed.openshift.io/gitHash: b7d4643
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -81,13 +81,13 @@ objects:
           namespace: openshift-monitoring
     - apiVersion: v1
       data:
-        main.py: "#!/usr/bin/env python\n\n\nimport argparse\nimport boto3\nimport\
-          \ botocore\nimport datetime\nimport logging\nimport os\nimport re\nimport\
-          \ time\n\nfrom prometheus_client import start_http_server, Gauge, Counter\n\
-          \nEBS_IOPS = Gauge(\"ebs_iops_credits\",\n                 \"Percent of\
-          \ burstable IOPS credit available\", labelnames=['vol_id'])\n\n# A list\
-          \ (implemented as a Set) of all active volumes.\nACTIVE_VOLUMES = set([])\n\
-          \n# Period in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
+        main.py: "#!/usr/bin/env python\n\nimport argparse\nimport boto3\nimport botocore\n\
+          import datetime\nimport logging\nimport os\nimport re\nimport time\n\nfrom\
+          \ prometheus_client import start_http_server, Gauge, Counter\n\nEBS_IOPS\
+          \ = Gauge(\"ebs_iops_credits\",\n                 \"Percent of burstable\
+          \ IOPS credit available\", labelnames=['vol_id'])\n\n# A list (implemented\
+          \ as a Set) of all active volumes.\nACTIVE_VOLUMES = set([])\n\n# Period\
+          \ in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
           CLOUDWATCH_PERIOD = 5\n\nBOTO_ERRS = Counter('boto_exceptions', 'The total\
           \ number of boto exceptions')\n\n\ndef chunks(l, n):\n    \"\"\"\n    Chunks\
           \ up an array +l+ into chunks of +n+ size\n    Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks\n\
@@ -108,7 +108,7 @@ objects:
           \    seen_volumes = set([])\n\n    # get the volume IDs and filter the results\
           \ to show only metrics that have had data points published in the past three\
           \ hours\n    volumePager = cw.get_paginator('list_metrics')\n    for p in\
-          \ volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS'):\n\
+          \ volumePager.paginate(MetricName='BurstBalance', Namespace='AWS/EBS', RecentlyActive='PT3H'):\n\
           \        for v in p['Metrics']:\n            volumes.add(v['Dimensions'][0]['Value'])\n\
           \n    dimensionCriteria = []\n    for volume in list(volumes):\n       \
           \ dimensionCriteria.append({\n            'Id': re.sub(r'^vol-', \"vol_\"\
