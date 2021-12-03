@@ -27,6 +27,9 @@ spec:
           mountPath: /secrets
         - name: envfiles
           mountPath: /config
+        - mountPath: /etc/pki/ca-trust/extracted/pem
+          name: trusted-ca-bundle
+          readOnly: true
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -79,6 +82,9 @@ spec:
         - name: secrets
           mountPath: /secrets
           readOnly: true
+        - mountPath: /etc/pki/ca-trust/extracted/pem
+          name: trusted-ca-bundle
+          readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       serviceAccountName: $SERVICEACCOUNT_NAME
@@ -93,6 +99,13 @@ spec:
       - name: monitor-volume
         configMap:
           name: $SOURCE_CONFIGMAP_NAME
+      - name: trusted-ca-bundle
+        configMap:
+          defaultMode: 420
+          items:
+            - key: ca-bundle.crt
+              path: tls-ca-bundle.pem
+          name: $PREFIXED_NAME-trusted-ca-bundle
   triggers:
   - type: ConfigChange
   strategy:

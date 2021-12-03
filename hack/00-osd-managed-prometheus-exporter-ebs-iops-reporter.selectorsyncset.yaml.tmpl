@@ -8,7 +8,7 @@ objects:
   metadata:
     generation: 1
     labels:
-      managed.openshift.io/gitHash: b7d4643
+      managed.openshift.io/gitHash: b30db33
       managed.openshift.io/osd: 'true'
     name: osd-managed-prometheus-exporter-ebs-iops-reporter
   spec:
@@ -81,13 +81,13 @@ objects:
           namespace: openshift-monitoring
     - apiVersion: v1
       data:
-        main.py: "#!/usr/bin/env python\n\nimport argparse\nimport boto3\nimport botocore\n\
-          import datetime\nimport logging\nimport os\nimport re\nimport time\n\nfrom\
-          \ prometheus_client import start_http_server, Gauge, Counter\n\nEBS_IOPS\
-          \ = Gauge(\"ebs_iops_credits\",\n                 \"Percent of burstable\
-          \ IOPS credit available\", labelnames=['vol_id'])\n\n# A list (implemented\
-          \ as a Set) of all active volumes.\nACTIVE_VOLUMES = set([])\n\n# Period\
-          \ in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
+        main.py: "#!/usr/bin/env python\n\n\nimport argparse\nimport boto3\nimport\
+          \ botocore\nimport datetime\nimport logging\nimport os\nimport re\nimport\
+          \ time\n\nfrom prometheus_client import start_http_server, Gauge, Counter\n\
+          \nEBS_IOPS = Gauge(\"ebs_iops_credits\",\n                 \"Percent of\
+          \ burstable IOPS credit available\", labelnames=['vol_id'])\n\n# A list\
+          \ (implemented as a Set) of all active volumes.\nACTIVE_VOLUMES = set([])\n\
+          \n# Period in minutes from cloudwatch to request\n# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html\n\
           CLOUDWATCH_PERIOD = 5\n\nBOTO_ERRS = Counter('boto_exceptions', 'The total\
           \ number of boto exceptions')\n\n\ndef chunks(l, n):\n    \"\"\"\n    Chunks\
           \ up an array +l+ into chunks of +n+ size\n    Based on https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks\n\
@@ -182,6 +182,13 @@ objects:
         creationTimestamp: null
         name: sre-ebs-iops-reporter-code
         namespace: openshift-monitoring
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        labels:
+          config.openshift.io/inject-trusted-cabundle: 'true'
+        name: sre-ebs-iops-reporter-trusted-ca-bundle
+        namespace: openshift-monitoring
     - apiVersion: apps.openshift.io/v1
       kind: DeploymentConfig
       metadata:
@@ -251,6 +258,9 @@ objects:
               - mountPath: /secrets
                 name: secrets
                 readOnly: true
+              - mountPath: /etc/pki/ca-trust/extracted/pem
+                name: trusted-ca-bundle
+                readOnly: true
               workingDir: /monitor
             dnsPolicy: ClusterFirst
             initContainers:
@@ -276,6 +286,9 @@ objects:
                 name: secrets
               - mountPath: /config
                 name: envfiles
+              - mountPath: /etc/pki/ca-trust/extracted/pem
+                name: trusted-ca-bundle
+                readOnly: true
             restartPolicy: Always
             serviceAccountName: sre-ebs-iops-reporter
             tolerations:
@@ -293,6 +306,13 @@ objects:
             - configMap:
                 name: sre-ebs-iops-reporter-code
               name: monitor-volume
+            - configMap:
+                defaultMode: 420
+                items:
+                - key: ca-bundle.crt
+                  path: tls-ca-bundle.pem
+                name: sre-ebs-iops-reporter-trusted-ca-bundle
+              name: trusted-ca-bundle
         triggers:
         - type: ConfigChange
     - apiVersion: v1

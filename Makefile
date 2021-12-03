@@ -51,10 +51,11 @@ RESOURCELIST := servicemonitor/$(PREFIXED_NAME) service/$(PREFIXED_NAME) \
 	deploymentconfig/$(PREFIXED_NAME) secret/$(AWS_CREDENTIALS_SECRET_NAME) \
 	configmap/$(SOURCE_CONFIGMAP_NAME) rolebinding/$(PREFIXED_NAME) \
 	serviceaccount/$(SERVICEACCOUNT_NAME) clusterrole/sre-allow-read-cluster-setup \
-	CredentialsRequest/$(AWS_CREDENTIALS_SECRET_NAME)
+	CredentialsRequest/$(AWS_CREDENTIALS_SECRET_NAME) \
+	configmap/$(PREFIXED_NAME)-trusted-ca-bundle
 
 
-all: deploy/010_serviceaccount-rolebinding.yaml deploy/020-awscredentials-request.yaml deploy/025_sourcecode.yaml deploy/040_deployment.yaml deploy/050_service.yaml deploy/060_servicemonitor.yaml generate-syncset
+all: deploy/010_serviceaccount-rolebinding.yaml deploy/020-awscredentials-request.yaml deploy/025_sourcecode.yaml deploy/030_ca-configmap.yaml deploy/040_deployment.yaml deploy/050_service.yaml deploy/060_servicemonitor.yaml generate-syncset
 
 deploy/020-awscredentials-request.yaml: resources/020-awscredentials-request.yaml.tmpl
 	@$(call generate_file,020-awscredentials-request)
@@ -67,6 +68,9 @@ deploy/025_sourcecode.yaml: $(SOURCEFILES)
 		files="--from-file=$$sfile $$files" ; \
 	done ; \
 	oc -n openshift-monitoring create configmap $(SOURCE_CONFIGMAP_NAME) --dry-run=client -o yaml $$files 1> deploy/025_sourcecode.yaml
+
+deploy/030_ca-configmap.yaml: resources/030_ca-configmap.yaml.tmpl
+	@$(call generate_file,030_ca-configmap)
 
 deploy/040_deployment.yaml: resources/040_deployment.yaml.tmpl
 	@$(call generate_file,040_deployment)
