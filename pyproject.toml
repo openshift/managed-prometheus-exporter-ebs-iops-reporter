@@ -6,7 +6,7 @@ authors = ["Red Hat Openshift SRE"]
 license = "apache"
 
 [tool.poetry.dependencies]
-python = ">3.8"
+python = ">3.6"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.4"
