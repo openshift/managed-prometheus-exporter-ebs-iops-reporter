@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "monitor"
+version = "0.1.0"
+description = "Managed Prometheus Exporter to report EBS IOPS"
+authors = ["Red Hat Openshift SRE"]
+license = "apache"
+
+[tool.poetry.dependencies]
+python = ">3.6"
+
+[tool.poetry.dev-dependencies]
+bandit = "^1.7.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
